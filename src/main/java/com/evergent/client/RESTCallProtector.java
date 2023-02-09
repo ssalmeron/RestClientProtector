@@ -21,7 +21,7 @@ public class RESTCallProtector  {
 
     private CircuitBreaker circuitBreaker ;
     private CircuitBreaker.Metrics metrics;
-    private CircuitBreakerConfig circuitBreakerConfig;
+
 
     MeterRegistry meterRegistry;
     CircuitBreakerRegistry circuitBreakerRegistry;
@@ -30,20 +30,6 @@ public class RESTCallProtector  {
         logger.debug("Creating REST Client Protector");
 
         meterRegistry = new SimpleMeterRegistry();
-        circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults();
-
-        //circuitBreaker = CircuitBreaker.ofDefaults("backendService");
-
-        //Use instead of above line to add Circuitbreaker to REgistry
-        circuitBreaker = circuitBreakerRegistry.circuitBreaker("backendService");
-
-
-        TaggedCircuitBreakerMetrics.ofCircuitBreakerRegistry(circuitBreakerRegistry)
-                .bindTo(meterRegistry);
-
-
-
-
 
 
     }
@@ -61,14 +47,11 @@ public class RESTCallProtector  {
         return circuitBreaker;
     }
 
-    public Supplier<RestClientResponse> addCircuitBreaker(int failureRateThreshold, int minimumNumberOfCalls, Supplier<RestClientResponse> supplier){
+    public Supplier<RestClientResponse> ProtectService(Supplier<RestClientResponse> supplier){
 
-        circuitBreakerConfig = CircuitBreakerConfig.custom()
-                .failureRateThreshold(failureRateThreshold)
-                .minimumNumberOfCalls(minimumNumberOfCalls)
-                .build();
 
-        logger.debug("Adding Circuitbreaker..");
+
+        logger.debug("*** Protecting Service... ");
         // Create a CircuitBreaker with default configuration
 
         metrics = circuitBreaker.getMetrics();
@@ -78,6 +61,24 @@ public class RESTCallProtector  {
 
         return restClientResponseSupplier;
 
+
+    }
+
+    public void addCircuitBreaker(CircuitBreakerConfig circuitBreakerConfig){
+
+        logger.debug("*** Adding CircuitBraker ... ");
+        logger.debug("*** Configuration... " + circuitBreakerConfig);
+
+        circuitBreakerRegistry = CircuitBreakerRegistry.ofDefaults();
+
+        circuitBreakerRegistry.addConfiguration("Custom",circuitBreakerConfig);
+
+
+        //Use instead of above line to add Circuit breaker to RRegistry
+        circuitBreaker = circuitBreakerRegistry.circuitBreaker("backendService","Custom");
+
+        TaggedCircuitBreakerMetrics.ofCircuitBreakerRegistry(circuitBreakerRegistry)
+                .bindTo(meterRegistry);
 
     }
 
