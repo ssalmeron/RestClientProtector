@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" status="warn" name="TransactionHandler" packages="">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout
+                    pattern="%d{dd/MM/yyyy - HH:mm:ss} | %-5level | %logger{36} -&gt; %M() -&gt; %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <logger name="AppLogger" level="ALL"
+                additivity="false">
+            <AppenderRef ref="Console" level="ALL"/>
+        </logger>
+        <!-- Log everything in hibernate -->
+        <Logger name="io.github.resilience4j.circuitbreaker.internal.CircuitBreakerStateMachine" level="ALL" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="ERROR"/>
+    </Loggers>
+</log4j:configuration>
